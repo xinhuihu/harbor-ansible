@@ -1,7 +1,0 @@
----
-- name: resolve platform
-  import_tasks: "{{item}}"
-  with_first_found:
-    - "{{ansible_distribution}}-{{ansible_distribution_release}}.yml"
-    - "{{ansible_distribution}}.yml"
-    - "{{ansible_os_family}}.yml"

@@ -1,6 +1,0 @@
----
-redhat_pkg_install:
-  - git
-  - wget
-  - python-pip
-  - python-devel
