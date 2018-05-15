@@ -5,8 +5,8 @@
     - name: Run the commone role
       role: common
 
-#    - name: Config target hosts for no ssh password 
-#      role: pre-harbor
+    - name: Install the requirements packages
+      role: pre-harbor
 
     - name: Setup docker engine on nodes
       role: docker

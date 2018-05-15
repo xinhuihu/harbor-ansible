@@ -1,0 +1,7 @@
+---
+redhat_pkg_install:
+  - epel-release     
+  - git
+  - wget
+  - python-pip
+  - python-devel
