@@ -1,0 +1,27 @@
+[all]
+host1 ansible_connection=ssh ansible_ssh_user=root ansible_ssh_pass=root
+host2 ansible_connection=ssh ansible_ssh_user=root ansible_ssh_pass=root 
+host3 ansible_connection=ssh ansible_ssh_user=root ansible_ssh_pass=root
+host4 ansible_connection=ssh ansible_ssh_user=root ansible_ssh_pass=root
+host5 ansible_connection=ssh ansible_ssh_user=root ansible_ssh_pass=root
+host6 ansible_connection=ssh ansible_ssh_user=root ansible_ssh_pass=root
+host7 ansible_connection=ssh ansible_ssh_user=root ansible_ssh_pass=root
+[loadbalance]
+host1
+host2
+[redis-cluster]
+host3 
+host4
+host5
+[db-cluster]
+host3
+host4
+host5
+[harbor-instances]
+host1
+host2
+[harbor-cluster:children]
+loadbalance
+redis-cluster
+db-cluster
+harbor-instances

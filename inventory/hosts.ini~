@@ -1,0 +1,15 @@
+[all]
+harbor3 ansible_connection=ssh ansible_ssh_host=10.1.0.77 ansible_ssh_user=root ansible_ssh_pass=root
+[loadbalance]
+harbor3
+[redis-cluster]
+harbor3 
+[db-cluster]
+harbor3
+[harbor-instances]
+harbor3
+[harbor-cluster:children]
+loadbalance
+redis-cluster
+db-cluster
+harbor-instances
