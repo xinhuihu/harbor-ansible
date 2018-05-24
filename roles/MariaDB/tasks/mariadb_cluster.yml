@@ -1,2 +1,0 @@
----
-- include: "mariadb_cluster_{{ansible_os_family}}.yml"

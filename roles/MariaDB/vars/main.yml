@@ -1,7 +1,0 @@
----
-
-sckages_noarch: []
-
-services_noarch:
-  - mysql
-

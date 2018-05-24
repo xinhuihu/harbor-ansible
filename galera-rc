@@ -1,0 +1,6 @@
+#!/bin/bash
+workdir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+export ANSIBLE_ACTION_PLUGINS=$workdir/plugins/action
+export ANSIBLE_CALLBACK_PLUGINS=$workdir/plugins/callback
+export ANSIBLE_FILTER_PLUGINS=$workdir/plugins/filter
+export ANSIBLE_LOOKUP_PLUGINS=$workdir/plugins/lookup

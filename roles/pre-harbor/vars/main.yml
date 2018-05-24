@@ -1,6 +1,7 @@
 ---
 redhat_pkg_install:
   - epel-release
+  - yum-utils
   - git
   - wget
   - python-pip

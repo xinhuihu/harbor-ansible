@@ -8,14 +8,14 @@
     - name: Install the requirements packages
       role: pre-harbor
 
-    - name: Setup docker engine on nodes
-      role: docker
+    - name: Install pip
+      role: pip_install
 
 - name:  Install db cluster
-  hosts: harbor-cluster:db-cluster
+  hosts: harbor-cluster:galera_all
   roles: 
     - name: Install MariaDB cluster
-      role: MariaDB
+      role: galera_server
 
 #    - name: Install PostgresSQL cluster
 #      role: PostgresSQL
