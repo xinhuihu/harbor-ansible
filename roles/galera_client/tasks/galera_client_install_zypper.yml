@@ -1,0 +1,87 @@
+---
+# Copyright 2017, SUSE LINUX GmbH.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+- name: Stats /etc/my.cnf.d
+  stat:
+    path: /etc/my.cnf.d
+  register: mycnfd_stat
+
+- name: Destroy my.cnf.d dir if is dir
+  file:
+    path: /etc/my.cnf.d
+    state: absent
+    force: true
+  when:
+    - mycnfd_stat.stat.isdir is defined
+    - mycnfd_stat.stat.isdir == True
+
+- name: Update the local file system CRUD
+  file:
+    src: "{{ item.src|default(omit) }}"
+    path: "{{ item.path }}"
+    state: "{{ item.state }}"
+    force: "{{ item.force|default(omit) }}"
+  with_items:
+    - { path: "/etc/mysql", state: "directory" }
+    - { path: "/etc/mysql/conf.d", state: "directory" }
+    - { src: "/etc/mysql/conf.d", path: "/etc/my.cnf.d", state: "link", force: true }
+    - { src: "/etc/mysql/my.cnf", path: "/etc/my.cnf", state: "link", force: true }
+  tags:
+    - galera-config
+
+- name: Add galera gpg-keys
+  block:
+    - name: Add keys (primary keyserver)
+      rpm_key:
+        state: present
+        key: "{{ item.keyserver }}/{{ item.key_name }}"
+      register: add_keys
+      until: add_keys|success
+      retries: 5
+      delay: 2
+      with_items: "{{ galera_client_gpg_keys }}"
+      tags:
+        - galera-gpg-keys
+
+  rescue:
+    - name: Add keys (fallback keyserver)
+      rpm_key:
+        state: present
+        key: "{{ item.fallback_keyserver }}/{{ item.key_name }}"
+      register: add_keys
+      until: add_keys|success
+      retries: 5
+      delay: 2
+      with_items: "{{ galera_client_gpg_keys }}"
+      when: item.fallback_keyserver is defined
+      tags:
+        - galera-gpg-keys
+
+- name: Add galera repo
+  zypper_repository:
+    name: "{{ item.name }}"
+    description: "{{ item.description }}"
+    repo: "{{ item.baseurl }}"
+    autorefresh: yes
+    auto_import_keys: no
+    enabled: yes
+  register: add_repos
+  until: add_repos | success
+  retries: 5
+  delay: 2
+  with_items:
+    - "{{ galera_client_repo }}"
+  tags:
+    - galera-repos
