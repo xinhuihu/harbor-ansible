@@ -1,0 +1,110 @@
+---
+# Copyright 2016, Rackspace US, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+## APT Cache Options
+cache_timeout: 600
+
+# Default private device setting
+_galera_disable_privatedevices: yes
+
+# Galera GPG Keys
+_galera_gpg_keys:
+  - key_name: 'mariadb'
+    keyserver: 'hkp://keyserver.ubuntu.com:80'
+    fallback_keyserver: 'hkp://p80.pool.sks-keyservers.net:80'
+    hash_id: '0xF1656F24C74CD1D8'
+  - key_name: 'percona-xtrabackup'
+    keyserver: 'hkp://keyserver.ubuntu.com:80'
+    fallback_keyserver: 'hkp://p80.pool.sks-keyservers.net:80'
+    hash_id: '0x9334a25f8507efa5'
+
+galera_server_required_distro_packages:
+  - apt-transport-https
+  - debconf-utils
+  - libaio1
+  - libc6
+  - libgcc1
+  - libgcrypt20
+  - libstdc++6
+  - python-software-properties
+  - software-properties-common
+  - xinetd
+
+galera_etc_conf_file: "/etc/mysql/my.cnf"
+galera_etc_include_dir: "/etc/mysql/conf.d"
+galera_var_run_socket: "/var/run/mysqld/mysqld.sock"
+
+# The package name for mariaDB is set as a variable
+# so that it can be used in debconf later in the
+# "galera_common" role.
+_galera_mariadb_server_package: "mariadb-server-{{ galera_major_version }}"
+
+# NB This is specifically galera_server_mariadb_distro_packages as these
+# packages only get installed during the galera play - this is because of
+# the preseed task and the service startup control used when installing
+# mariadb-galera-server and galera.
+galera_server_mariadb_distro_packages:
+  - libmariadbclient-dev
+  - mariadb-client
+  - "{{ galera_mariadb_server_package }}"
+  - galera-3
+  - rsync
+  - socat
+
+# The packages to uninstall during an upgrade from a previous version
+galera_server_upgrade_packages_remove:
+  - mariadb-server
+  - mysql-common
+
+galera_mariadb_service_name: "mariadb"
+
+galera_debconf_items:
+  - question: "mysql-server/root_password"
+    name: "{{ galera_mariadb_server_package }}"
+    value: "{{ galera_root_password }}"
+    vtype: "string"
+  - question: "mysql-server/root_password_again"
+    name: "{{ galera_mariadb_server_package }}"
+    value: "{{ galera_root_password }}"
+    vtype: "string"
+
+galera_server_percona_distro_packages:
+  - percona-toolkit
+  - percona-xtrabackup
+  - "{{ (galera_xtrabackup_compression | bool) | ternary('qpress', '') }}"
+
+# Repositories
+_galera_percona_xtrabackup_repo:
+  repo: "deb http://repo.percona.com/apt {{ ansible_distribution_release }} main"
+  state: "{{ (use_percona_upstream | bool) | ternary('present', 'absent') }}"
+  filename: "Percona"
+
+# TODO(evrardjp): Unfreeze version to 10.1 branch when clustering issue is solved.
+_galera_repo_url: "http://downloads.mariadb.com/MariaDB/mariadb-{{ galera_major_version }}.{{ galera_minor_version }}/repo/ubuntu"
+_galera_repo:
+  repo: "deb {{ galera_repo_url }} {{ ansible_distribution_release }} main"
+  state: "present"
+  filename: "MariaDB"
+
+galera_wsrep_provider: "/usr/lib/galera/libgalera_smm.so"
+
+_use_percona_upstream: "{{ ansible_architecture == 'x86_64' }}"
+
+galera_server_percona_distro_packages_alt_arch:
+  ppc64le:
+    - url: "http://public.dhe.ibm.com/systems/virtualization/Novalink/misc/percona-xtrabackup/percona-xtrabackup-24_2.4.5-1_ppc64el.deb"
+      checksum: "sha256:3d4e4112f4c8020c9190a91d962dabed1dfaad307160a939e121208887eaee2a"
+    - url: "http://public.dhe.ibm.com/systems/virtualization/Novalink/misc/qpress/qpress_11-1_ppc64el.deb"
+      checksum: "sha256:a31d3e00dbcec9b3f98eae82b261d054d0b80a57f4a38967d0e953811cb082f3"
