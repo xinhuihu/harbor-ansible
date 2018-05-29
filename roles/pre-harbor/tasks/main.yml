@@ -22,3 +22,7 @@
   when:
    - ansible_os_family == 'RedHat'
    - firewalld_check.rc == 0
+
+- name: Disable selinux
+  selinux:
+    state: disabled

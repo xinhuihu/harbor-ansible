@@ -11,4 +11,44 @@ docker_install_method: package
 #how to service: docker or package 
 deploy_by_docker: True
 
+keepalived_sync_groups:
+  haproxy:
+    instances:
+      - external
 
+haproxy_ssl: false
+haproxy_use_keepalived: true
+internal_lb_vip_address: "10.1.0.222"
+external_lb_vip_address: "{{ internal_lb_vip_address }}"
+haproxy_keepalived_external_vip_cidr: "{{external_lb_vip_address}}/32"
+haproxy_keepalived_external_interface: "{{ ansible_default_ipv4.interface }}"
+haproxy_keepalived_authentication_password: 'keepalived'
+keepalived_instances:
+  external:
+    interface: "{{ haproxy_keepalived_external_interface }}"
+    state: "BACKUP"
+    virtual_router_id: "{{ haproxy_keepalived_external_virtual_router_id | default ('10') }}"
+    priority: "{{ ((ansible_play_hosts|length-ansible_play_hosts.index(inventory_hostname))*100)-((ansible_play_hosts|length-ansible_play_hosts.index(inventory_hostname))*50) }}"
+    authentication_password: "{{ haproxy_keepalived_authentication_password }}"
+    vips:
+      - "{{ haproxy_keepalived_external_vip_cidr | default('10.1.0.222/32')  }} dev {{ haproxy_keepalived_external_interface }}"
+
+haproxy_default_services:
+  - service:
+      haproxy_service_name: galera
+      haproxy_backend_nodes: "{{ (groups['galera_all'] | default([]))[:1] }}"  # list expected
+      haproxy_backup_nodes: "{{ (groups['galera_all'] | default([]))[1:] }}"
+      haproxy_bind: "{{ [external_lb_vip_address] }}"
+      haproxy_port: 3306
+      haproxy_balance_type: tcp
+      haproxy_timeout_client: 5000s
+      haproxy_timeout_server: 5000s
+      haproxy_service_enabled: "{{ groups['galera_all'] is defined and groups['galera_all'] | length > 0 }}"
+
+haproxy_bind_on_non_local: "True"
+keepalived_selinux_compile_rules:
+  - keepalived_ping
+  - keepalived_haproxy_pid_file
+
+# Ensure that the package state matches the global setting
+haproxy_package_state: "latest"

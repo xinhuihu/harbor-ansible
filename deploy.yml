@@ -1,30 +1,30 @@
 ---
-- name:  Install requirements  befor deploy the harbor instances
-  hosts: harbor-cluster
-  roles:
-    - name: Run the commone role
-      role: common
-
-    - name: Install the requirements packages
-      role: pre-harbor
-
-    - name: Install pip
-      role: pip_install
-
-- name:  Install db cluster
-  hosts: harbor-cluster:galera_all
-  roles: 
-    - name: Install MariaDB cluster
-      role: galera_server
-
+#- name:  Install requirements  befor deploy the harbor instances
+#  hosts: harbor-cluster
+#  roles:
+#    - name: Run the commone role
+#      role: common
+#
+#    - name: Install the requirements packages
+#      role: pre-harbor
+#
+#    - name: Install pip
+#      role: pip_install
+#
+#- name:  Install db cluster
+#  hosts: harbor-cluster:galera_all
+#  roles: 
+#    - name: Install MariaDB cluster
+#      role: galera_server
+#
 #    - name: Install PostgresSQL cluster
 #      role: PostgresSQL
 #      when:
 #        - clair == true 
 #
-- name:  Install redis cluster
-  hosts: harbor-cluster:redis-cluster
-  role:  redis
+#- name:  Install redis cluster
+#  hosts: harbor-cluster:redis-cluster
+#  role:  redis
 
 #- name: install harbor instance on the target nodes
 #  hosts: harbor-cluster:harbor-instances
@@ -40,8 +40,12 @@
 #    - name: install harbor instances
 #      role: harbor
 #
-#- name:  Install and loadbalance for Harbor cluster
-#  hosts: harbor-cluster:loadbalance
-#  role: loadbalance
-#  when:
-#    - ha == true
+- name:  Install and loadbalance for Harbor cluster
+  hosts: harbor-cluster:loadbalance
+  roles: 
+    - name: Install keepalived
+      role: keepalived
+   
+    - name: Install haproxy
+      role: haproxy_server
+      haproxy_service_configs: "{{ haproxy_default_services + haproxy_extra_services|default([]) }}"
