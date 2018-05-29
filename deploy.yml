@@ -12,7 +12,7 @@
 #      role: pip_install
 #
 #- name:  Install db cluster
-#  hosts: harbor-cluster:galera_all
+#  hosts: galera_all
 #  roles: 
 #    - name: Install MariaDB cluster
 #      role: galera_server
@@ -23,8 +23,12 @@
 #        - clair == true 
 #
 #- name:  Install redis cluster
-#  hosts: harbor-cluster:redis-cluster
-#  role:  redis
+#  hosts: redis-cluster
+#  roles: 
+#  - { role: redis/verify}
+#  - { role: redis/pre}
+#  - { role: redis/install}
+#  - { role: redis/configure}
 
 #- name: install harbor instance on the target nodes
 #  hosts: harbor-cluster:harbor-instances
@@ -41,7 +45,7 @@
 #      role: harbor
 #
 - name:  Install and loadbalance for Harbor cluster
-  hosts: harbor-cluster:loadbalance
+  hosts: loadbalance
   roles: 
     - name: Install keepalived
       role: keepalived

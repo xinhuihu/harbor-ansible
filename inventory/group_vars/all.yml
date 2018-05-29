@@ -11,6 +11,8 @@ docker_install_method: package
 #how to service: docker or package 
 deploy_by_docker: True
 
+##### haproxy and keepalived config ###############
+
 keepalived_sync_groups:
   haproxy:
     instances:
@@ -45,6 +47,18 @@ haproxy_default_services:
       haproxy_timeout_server: 5000s
       haproxy_service_enabled: "{{ groups['galera_all'] is defined and groups['galera_all'] | length > 0 }}"
 
+  - service:
+      haproxy_service_name: redis
+      haproxy_backend_nodes: "{{ (groups['redis-cluster'] | default([]))[:1] }}"  # list expected
+      haproxy_backup_nodes: "{{ (groups['redis-cluster'] | default([]))[1:] }}"
+      haproxy_bind: "{{ [external_lb_vip_address] }}"
+      haproxy_port: 6379
+      haproxy_backend_port: 7000
+      haproxy_balance_type: tcp
+      haproxy_timeout_client: 5000s
+      haproxy_timeout_server: 5000s
+      haproxy_service_enabled: "{{ groups['redis-cluster'] is defined and groups['redis-cluster'] | length > 0 }}"
+
 haproxy_bind_on_non_local: "True"
 keepalived_selinux_compile_rules:
   - keepalived_ping
@@ -52,3 +66,28 @@ keepalived_selinux_compile_rules:
 
 # Ensure that the package state matches the global setting
 haproxy_package_state: "latest"
+
+
+##### Redis config #####################
+software_files_path: "~"
+software_install_path: "/usr/local"
+
+redis_version: "4.0.1"
+redis_name: "redis-{{ redis_version }}"
+
+redis_file: "{{ redis_name }}.tar.gz"
+redis_file_path: "{{ software_files_path }}/{{ redis_file }}"
+redis_file_url: "http://download.redis.io/releases/redis-{{ redis_version }}.tar.gz"
+redis_src_path: "{{ software_install_path }}/{{ redis_name }}"
+
+redis_data_path: "/var/run/redis"
+
+redis_deploy_type: 'cluster'
+
+redis_cluster_node_port_size: 2
+redis_cluster_min_port_size: 6
+redis_cluster_begin_port: 7000
+redis_cluster_replicas: 1
+redis_cluster_trib_separator: " "
+
+redis_passwd: "123456"
