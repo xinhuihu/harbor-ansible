@@ -1,0 +1,52 @@
+# {{ ansible_managed }}
+
+global
+        log 127.0.0.1 local0
+        log 127.0.0.1 local1 notice
+        chroot /var/lib/haproxy
+        user haproxy
+        group haproxy
+        daemon
+        maxconn {{ haproxy_maxconn }}
+{% if haproxy_tuning_params is defined %}
+        nbproc {{ haproxy_tuning_params.nbproc | default('1') }}
+        tune.bufsize {{ haproxy_tuning_params.bufsize | default('384000') }}
+        tune.chksize {{ haproxy_tuning_params.chksize | default('16384') }}
+        tune.comp.maxlevel {{ haproxy_tuning_params.comp_maxlevel | default('1') }}
+        tune.http.maxhdr {{ haproxy_tuning_params.http_maxhdr | default('101') }}
+        tune.http.maxaccept{{ haproxy_tuning_params.http_maxaccept | default('64') }}
+        tune.ssl.cachesize {{ haproxy_tuning_params.ssl_cachesize | default('20000') }}
+        tune.ssl.lifetime {{ haproxy_tuning_params.ssl_lifetime | default('300') }}
+{% endif %}
+        stats socket /var/run/haproxy.stat level admin mode 600
+        {% if haproxy_ssl | bool %}
+        ssl-default-bind-options {{ haproxy_ssl_bind_options }}
+        tune.ssl.default-dh-param {{haproxy_ssl_dh_param}}
+        {% endif %}
+
+defaults
+        log global
+        option dontlognull
+        option redispatch
+        retries {{ haproxy_retries }}
+        timeout client {{ haproxy_client_timeout }}
+        timeout connect {{ haproxy_connect_timeout }}
+        timeout http-request {{ haproxy_http_request_timeout }}
+        timeout server {{ haproxy_server_timeout }}
+        maxconn {{ haproxy_maxconn }}
+
+{% if haproxy_stats_enabled | bool %}
+listen stats
+    bind {{ haproxy_stats_bind_address }}:{{ haproxy_stats_port }} {% if haproxy_ssl | bool %}ssl crt {{ haproxy_ssl_pem }} ciphers {{ haproxy_ssl_cipher_suite }}{% endif %}
+
+    mode http
+    stats enable
+    stats hide-version
+    stats realm Haproxy\ Statistics
+    stats uri /
+    stats show-node
+    stats show-legends
+    stats auth {{ haproxy_username }}:{{ haproxy_stats_password }}
+    stats admin if TRUE
+    stats refresh {{ haproxy_stats_refresh_interval }}s
+{% endif %}

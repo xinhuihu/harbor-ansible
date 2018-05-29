@@ -22,10 +22,10 @@
 #      when:
 #        - clair == true 
 #
-#- name:  Install redis cluster
-#  hosts: harbor-cluster:redis-cluster
-#  role:  redis
-#
+- name:  Install redis cluster
+  hosts: harbor-cluster:redis-cluster
+  role:  redis
+
 #- name: install harbor instance on the target nodes
 #  hosts: harbor-cluster:harbor-instances
 #  roles:
