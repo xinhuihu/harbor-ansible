@@ -30,11 +30,11 @@
 #  - { role: redis/install}
 #  - { role: redis/configure}
 
-#- name: install harbor instance on the target nodes
-#  hosts: harbor-cluster:harbor-instances
-#  roles:
-#    - name: install docker-compose on the harbor instances node
-#      role: docker-compose
+- name: install harbor instance on the target nodes
+  hosts: harbor-instances
+  roles:
+    - name: install docker-compose on the harbor instances node
+      role: docker-compose
 #    
 #    - name: Config the harbor instances to ues the share storage
 #      role: storage
