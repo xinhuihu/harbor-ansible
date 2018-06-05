@@ -22,13 +22,17 @@
 #      when:
 #        - clair == true 
 #
-#- name:  Install redis cluster
-#  hosts: redis-cluster
-#  roles: 
-#  - { role: redis/verify}
-#  - { role: redis/pre}
-#  - { role: redis/install}
-#  - { role: redis/configure}
+- name:  Install redis cluster
+  hosts: redis-cluster
+  roles:
+  - name: verify redis configure
+    role: redis/verify
+  - name: install redis dependency package
+    role: redis/pre
+  - name: install redis
+    role: redis/install
+  - name: Configure and start the redis service
+    role: redis/configure
 
 #- name: install harbor instance on the target nodes
 #  hosts: harbor-cluster:harbor-instances
