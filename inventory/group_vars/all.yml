@@ -69,18 +69,19 @@ haproxy_package_state: "latest"
 
 
 ##### Redis config #####################
-software_files_path: "~"
-software_install_path: "/usr/local"
+all_redis_node_group: "redis-cluster"
 
+redis_name: "redis"
 redis_version: "4.0.1"
-redis_name: "redis-{{ redis_version }}"
 
-redis_file: "{{ redis_name }}.tar.gz"
-redis_file_path: "{{ software_files_path }}/{{ redis_file }}"
-redis_file_url: "http://download.redis.io/releases/redis-{{ redis_version }}.tar.gz"
-redis_src_path: "{{ software_install_path }}/{{ redis_name }}"
+redis_download_path: "/tmp"
+redis_install_path: "/usr/local"
+redis_src_path: "{{ redis_install_path }}/{{ redis_name }}-{{ redis_version }}"
+redis_data_path: "/opt/redis"
 
-redis_data_path: "/var/run/redis"
+redis_file: "{{ redis_name }}-{{ redis_version }}.tar.gz"
+redis_file_url: "http://download.redis.io/releases/{{ redis_file }}"
+redis_file_path: "{{ redis_download_path }}/{{ redis_file }}"
 
 redis_deploy_type: 'cluster'
 
@@ -91,3 +92,6 @@ redis_cluster_replicas: 1
 redis_cluster_trib_separator: " "
 
 redis_passwd: "123456"
+
+redis_log_level: notice
+redis_log_dir: /export/logs/redis
