@@ -1,0 +1,45 @@
+---
+- name: Gather variables for each operating system
+  include_vars: "{{ item }}"
+  with_first_found:
+    - "{{ ansible_distribution | lower }}-{{ ansible_distribution_version | lower }}.yml"
+    - "{{ ansible_distribution | lower }}-{{ ansible_distribution_major_version | lower }}.yml"
+    - "{{ ansible_os_family | lower }}-{{ ansible_distribution_major_version | lower }}.yml"
+    - "{{ ansible_distribution | lower }}.yml"
+    - "{{ ansible_os_family | lower }}.yml"
+- name: make NFS directories
+  file:
+    dest: "{{ item }}"
+    mode: 0777
+    state: directory
+  with_items:
+    - "/data"
+
+- name: configure NFS service
+  lineinfile:
+    dest: /etc/services
+    state: present
+    create: yes
+    line: "nfs    2049/{{ item }}"
+    regexp: "^[[:space:]]*nfs[[:space:]]*2049/{{ item }}"
+  with_items:
+    - "tcp"
+    - "udp"
+- name: configure NFS exports
+  lineinfile:
+    dest: /etc/exports
+    state: present
+    create: yes
+    line: "{{ item }}"
+  with_items:
+    - "/data         *(rw,sync,no_subtree_check,no_root_squash)"
+
+- name: Install the NFS server package
+  package:
+    name: "{{ nfs_server_package }}"
+    state: present
+
+- name: restart NFS service
+  service:
+    name: "{{ nfs_server_service }}"
+    state: restarted

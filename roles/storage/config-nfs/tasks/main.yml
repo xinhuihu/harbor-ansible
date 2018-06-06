@@ -1,0 +1,23 @@
+---
+- name: Gather variables for each operating system
+  include_vars: "{{ item }}"
+  with_first_found:
+    - "{{ ansible_distribution | lower }}-{{ ansible_distribution_version | lower }}.yml"
+    - "{{ ansible_distribution | lower }}-{{ ansible_distribution_major_version | lower }}.yml"
+    - "{{ ansible_os_family | lower }}-{{ ansible_distribution_major_version | lower }}.yml"
+    - "{{ ansible_distribution | lower }}.yml"
+    - "{{ ansible_os_family | lower }}.yml"
+
+- name: make dir data
+  file:
+    path: /data
+    state: directory 
+    mode: 0755
+
+- name: Install nfs-utils
+  package: name={{item}} state=present
+  with_items: "{{ redhat_pkg_install }}"
+  when: ansible_os_family == 'RedHat'
+
+- name: Mount NFS
+  mount: name=/data src={{nfs_server_ip }}:/data fstype=nfs state=mounted opts={{mount_nfs_opts}}

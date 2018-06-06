@@ -95,3 +95,6 @@ redis_passwd: "123456"
 
 redis_log_level: notice
 redis_log_dir: /export/logs/redis
+
+##### storage config #####################
+storage_type: "NFS"

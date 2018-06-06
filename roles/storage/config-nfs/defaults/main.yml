@@ -1,0 +1,4 @@
+---
+nfs_server: "{{ groups['storage'][0] }}"
+nfs_server_ip: "{{ hostvars[nfs_server]['ansible_ssh_host'] }}"
+mount_nfs_opts: "rw,bg,rsize=32768,wsize=32768,tcp,hard,intr,noacl,noatime,nodiratime" 
