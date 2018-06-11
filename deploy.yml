@@ -1,16 +1,16 @@
 ---
-#- name:  Install requirements  befor deploy the harbor instances
-#  hosts: harbor-cluster
-#  roles:
-#    - name: Run the commone role
-#      role: common
-#
-#    - name: Install the requirements packages
-#      role: pre-harbor
-#
-#    - name: Install pip
-#      role: pip_install
-#
+- name:  Install requirements  befor deploy the harbor instances
+  hosts: harbor-cluster
+  roles:
+    - name: Run the commone role
+      role: common
+
+    - name: Install the requirements packages
+      role: pre-harbor
+
+    - name: Install pip
+      role: pip_install
+
 #- name:  Install db cluster
 #  hosts: galera_all
 #  roles: 
@@ -44,20 +44,20 @@
 #      role: storage/install-nfs
 #      when:
 #        - storage_type == "NFS"
-
+#
 - name: install harbor instance on the target nodes
   hosts: harbor-instances
   roles:
-#    - name: install docker-compose on the harbor instances node
-#      role: docker-compose
-#    
+    - name: install docker-compose on the harbor instances node
+      role: docker-compose
+    
     - name: Config the harbor instances to ues nfs
       role: storage/config-nfs
       when:
         - storage_type == "NFS"
-#
-#    - name: install harbor instances
-#      role: harbor
+
+    - name: install harbor instances
+      role: harbor
 #
 #- name:  Install and loadbalance for Harbor cluster
 #  hosts: loadbalance

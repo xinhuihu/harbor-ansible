@@ -1,0 +1,59 @@
+---
+- name: Create  harbor download directory
+  file:
+    path: "{{local_release_dir}}"
+    state: directory
+    recurse: "yes"
+
+- name: get the package of harbor
+  get_url:
+    url: "{{harbor_download_url}}"
+    dest: "{{local_release_dir}}"
+  register: get_url_result
+  until: "'OK' in get_url_result.msg or 'file already exists' in get_url_result.msg"
+  retries: 4
+  delay: "{{ retry_stagger | random + 3 }}"
+
+- name: untar the file of harbor
+  shell: |
+    cd  "{{ local_release_dir }}";
+    tar -zxf harbor-offline-installer-v{{harbor_version}}.tgz
+
+
+#- name:  Load the schema of harbor
+#  shell: mysql -uroot -proot123 -h  < registry.sql 
+
+- name: Modify the hostname of harbor.cfg
+  lineinfile:
+    dest: "{{ local_release_dir }}/harbor/harbor.cfg"
+    regexp: '^hostname = reg.mydomain.com'
+    line: 'hostname = {{internal_lb_vip_address}}'
+
+- name: Modify the db password of harbor.cfg
+  lineinfile:
+    dest: "{{ local_release_dir }}/harbor/harbor.cfg"
+    regexp: '^db_password = root123'
+    line: 'db_password = {{galera_root_password}}'
+
+- name: Modify the address of the Harbor database
+  lineinfile:
+    dest: "{{ local_release_dir }}/harbor/harbor.cfg"
+    regexp: '^db_host = mysql'
+    line: 'db_host = {{internal_lb_vip_address}}'
+
+- name: Modify the address of the Harbor redis
+  lineinfile:
+    dest: "{{ local_release_dir }}/harbor/harbor.cfg"
+    regexp: '^redis_url = redis:6379'
+    line: 'redis_url = {{internal_lb_vip_address}}:6379'
+
+- name: Modify the install.sh
+  copy:
+    src: install.sh
+    dest: "{{ local_release_dir }}/harbor/install.sh"
+    mode: 0755 
+
+- name: Start the harbor for ha
+  shell: |
+      cd  "{{ local_release_dir }}/harbor";
+      ./install.sh --ha 

@@ -1,0 +1,8 @@
+---
+local_release_dir: "/tmp/releases"
+harbor_version: "1.5.0"
+harbor_download_url: https://storage.googleapis.com/harbor-releases/release-{{harbor_version}}/harbor-offline-installer-v{{harbor_version}}.tgz
+db_server: "{{ groups['db-cluster'][0] }}"
+db_server_ip: "{{ hostvars[db_server]['ansible_ssh_host'] }}"
+
+

@@ -2,15 +2,16 @@
 # Docker configurations
 #
 # docker registry
-docker_registry: 10.84.34.155:5000
-docker_registry_insecure: True
+#docker_registry: 10.84.34.155:5000
+#docker_registry_insecure: True
 #
 # install docker from package rather than installer from get.docker.com which is default method
-docker_install_method: package
+docker_install_method: installer
 
 #how to service: docker or package 
 deploy_by_docker: True
 
+retry_stagger: 5
 ##### haproxy and keepalived config ###############
 
 keepalived_sync_groups:
@@ -67,6 +68,10 @@ keepalived_selinux_compile_rules:
 # Ensure that the package state matches the global setting
 haproxy_package_state: "latest"
 
+##### database config #################
+galera_root_password: "root123"
+
+
 
 ##### Redis config #####################
 all_redis_node_group: "redis-cluster"
@@ -91,7 +96,7 @@ redis_cluster_begin_port: 7000
 redis_cluster_replicas: 1
 redis_cluster_trib_separator: " "
 
-redis_passwd: "123456"
+redis_passwd: ""
 
 redis_log_level: notice
 redis_log_dir: /export/logs/redis

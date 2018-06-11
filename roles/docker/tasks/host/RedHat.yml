@@ -1,5 +1,46 @@
 ---
-- name: install docker using package
-  yum:
-     name: "{{ docker_package_name }}"
-     state: latest
+#- name: install docker using package
+#  yum:
+#     name: "{{ docker_package_name }}"
+#     state: latest
+- name: Configure docker repository on RedHat/CentOS
+  template:
+    src: "rh_docker.repo.j2"
+    dest: "/etc/yum.repos.d/docker.repo"
+  when: ansible_distribution in ["CentOS","RedHat"]
+
+- name: Copy yum.conf for editing
+  copy:
+    src: "{{ yum_conf }}"
+    dest: "{{ docker_yum_conf }}"
+    remote_src: yes
+  when: ansible_distribution in ["CentOS","RedHat"] 
+
+- name: Edit copy of yum.conf to set obsoletes=0
+  lineinfile:
+    path: "{{ docker_yum_conf }}"
+    state: present
+    regexp: '^obsoletes='
+    line: 'obsoletes=0'
+  when: ansible_distribution in ["CentOS","RedHat"]
+
+- name: ensure docker packages are installed
+  action: "{{ docker_package_info.pkg_mgr }}"
+  args:
+    pkg: "{{item.name}}"
+    force: "{{item.force|default(omit)}}"
+    conf_file: "{{item.yum_conf|default(omit)}}"
+    state: present
+  register: docker_task_result
+  until: docker_task_result|succeeded
+  retries: 4
+  delay: "{{ retry_stagger | random + 3 }}"
+  with_items: "{{ docker_package_info.pkgs }}"
+  notify: restart docker
+  when: ansible_distribution in ["CentOS","RedHat"]
+
+- name: ensure service is started if docker packages are already present
+  service:
+    name: docker
+    state: started
+  when: docker_task_result is not changed
