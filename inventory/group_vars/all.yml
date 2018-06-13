@@ -60,6 +60,18 @@ haproxy_default_services:
       haproxy_timeout_server: 5000s
       haproxy_service_enabled: "{{ groups['redis-cluster'] is defined and groups['redis-cluster'] | length > 0 }}"
 
+  - service:
+      haproxy_service_name: harbor
+      haproxy_backend_nodes: "{{ groups['harbor-instances'] | default([]) }}"  # list expected
+      haproxy_bind: "{{ [external_lb_vip_address] }}"
+      haproxy_ssl: "{{ haproxy_ssl }}"
+      haproxy_port: 80
+      haproxy_backend_port: 80
+      haproxy_redirect_http_port: 80
+      haproxy_balance_type: http
+      haproxy_balance_alg: source
+      haproxy_service_enabled: "{{ groups['harbor-instances'] is defined and groups['harbor-instances'] | length > 0 }}"
+
 haproxy_bind_on_non_local: "True"
 keepalived_selinux_compile_rules:
   - keepalived_ping

@@ -1,15 +1,15 @@
 ---
-- name:  Install requirements  befor deploy the harbor instances
-  hosts: harbor-cluster
-  roles:
-    - name: Run the commone role
-      role: common
-
-    - name: Install the requirements packages
-      role: pre-harbor
-
-    - name: Install pip
-      role: pip_install
+#- name:  Install requirements  befor deploy the harbor instances
+#  hosts: harbor-cluster
+#  roles:
+#    - name: Run the commone role
+#      role: common
+#
+#    - name: Install the requirements packages
+#      role: pre-harbor
+#
+#    - name: Install pip
+#      role: pip_install
 
 #- name:  Install db cluster
 #  hosts: galera_all
@@ -45,26 +45,26 @@
 #      when:
 #        - storage_type == "NFS"
 #
-- name: install harbor instance on the target nodes
-  hosts: harbor-instances
-  roles:
-    - name: install docker-compose on the harbor instances node
-      role: docker-compose
-    
-    - name: Config the harbor instances to ues nfs
-      role: storage/config-nfs
-      when:
-        - storage_type == "NFS"
-
-    - name: install harbor instances
-      role: harbor
+#- name: install harbor instance on the target nodes
+#  hosts: harbor-instances
+#  roles:
+#    - name: install docker-compose on the harbor instances node
+#      role: docker-compose
+#    
+#    - name: Config the harbor instances to ues nfs
+#      role: storage/config-nfs
+#      when:
+#        - storage_type == "NFS"
 #
-#- name:  Install and loadbalance for Harbor cluster
-#  hosts: loadbalance
-#  roles: 
-#    - name: Install keepalived
-#      role: keepalived
-#   
-#    - name: Install haproxy
-#      role: haproxy_server
-#      haproxy_service_configs: "{{ haproxy_default_services + haproxy_extra_services|default([]) }}"
+#    - name: install harbor instances
+#      role: harbor
+#
+- name:  Install and loadbalance for Harbor cluster
+  hosts: loadbalance
+  roles: 
+    - name: Install keepalived
+      role: keepalived
+   
+    - name: Install haproxy
+      role: haproxy_server
+      haproxy_service_configs: "{{ haproxy_default_services + haproxy_extra_services|default([]) }}"

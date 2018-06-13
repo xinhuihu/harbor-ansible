@@ -100,7 +100,7 @@ backend {{ item.service.haproxy_service_name }}-back
 
 {% for host_name in item.service.haproxy_backend_nodes %}
 {% if hostvars[host_name] is defined %}
-{%   set ip_addr = hostvars[host_name]['ansible_default_ipv4']['address'] %}
+{%   set ip_addr = hostvars[host_name]['ansible_ssh_host'] %}
 {% endif %}
 {% set entry = [] %}
 {% set _ = entry.append("server") %}
@@ -120,7 +120,7 @@ backend {{ item.service.haproxy_service_name }}-back
 
 {% for host_name in item.service.haproxy_backup_nodes|default([]) %}
 {% if hostvars[host_name] is defined %}
-{%   set ip_addr = hostvars[host_name]['ansible_default_ipv4']['address'] %}
+{%   set ip_addr = hostvars[host_name]['ansible_ssh_host'] %}
 {% endif %}
 {% set entry = [] %}
 {% set _ = entry.append("server") %}
