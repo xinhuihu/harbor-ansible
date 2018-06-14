@@ -21,7 +21,7 @@ keepalived_sync_groups:
 
 haproxy_ssl: false
 haproxy_use_keepalived: true
-internal_lb_vip_address: "10.1.0.222"
+internal_lb_vip_address: "192.168.122.222"
 external_lb_vip_address: "{{ internal_lb_vip_address }}"
 haproxy_keepalived_external_vip_cidr: "{{external_lb_vip_address}}/32"
 haproxy_keepalived_external_interface: "{{ ansible_default_ipv4.interface }}"
@@ -47,18 +47,6 @@ haproxy_default_services:
       haproxy_timeout_client: 5000s
       haproxy_timeout_server: 5000s
       haproxy_service_enabled: "{{ groups['galera_all'] is defined and groups['galera_all'] | length > 0 }}"
-
-  - service:
-      haproxy_service_name: redis
-      haproxy_backend_nodes: "{{ (groups['redis-cluster'] | default([]))[:1] }}"  # list expected
-      haproxy_backup_nodes: "{{ (groups['redis-cluster'] | default([]))[1:] }}"
-      haproxy_bind: "{{ [external_lb_vip_address] }}"
-      haproxy_port: 6379
-      haproxy_backend_port: 7000
-      haproxy_balance_type: tcp
-      haproxy_timeout_client: 5000s
-      haproxy_timeout_server: 5000s
-      haproxy_service_enabled: "{{ groups['redis-cluster'] is defined and groups['redis-cluster'] | length > 0 }}"
 
   - service:
       haproxy_service_name: harbor
@@ -100,13 +88,9 @@ redis_file: "{{ redis_name }}-{{ redis_version }}.tar.gz"
 redis_file_url: "http://download.redis.io/releases/{{ redis_file }}"
 redis_file_path: "{{ redis_download_path }}/{{ redis_file }}"
 
-redis_deploy_type: 'cluster'
+redis_deploy_type: 'single'
 
-redis_cluster_node_port_size: 2
-redis_cluster_min_port_size: 6
-redis_cluster_begin_port: 7000
-redis_cluster_replicas: 1
-redis_cluster_trib_separator: " "
+redis_single_port: 6379
 
 redis_passwd: ""
 

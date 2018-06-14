@@ -1,12 +1,12 @@
 ---
 - name: verify | cluster -> check redis cluster node size
   assert:
-    that: (groups[all_redis_node_group] | length()) == 3 or (groups[all_redis_node_group] | length()) == 6
+    that: (groups['redis'] | length()) == 3 or (groups['redis'] | length()) == 6
     msg: "redis cluster node size must be 3 or 6"
   run_once: yes
 
 - name: verify | cluster -> check redis cluster deploy size
   assert:
-    that: redis_cluster_node_port_size * (groups[all_redis_node_group] | length()) >= 6
+    that: redis_cluster_node_port_size * (groups['redis'] | length()) >= 6
     msg: "redis cluster deploy size must be more than 6"
-  run_once: yesInstall galera_server role remote packages
+  run_once: yes

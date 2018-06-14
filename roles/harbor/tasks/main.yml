@@ -19,10 +19,6 @@
     cd  "{{ local_release_dir }}";
     tar -zxf harbor-offline-installer-v{{harbor_version}}.tgz
 
-
-#- name:  Load the schema of harbor
-#  shell: mysql -uroot -proot123 -h  < registry.sql 
-
 - name: Modify the hostname of harbor.cfg
   lineinfile:
     dest: "{{ local_release_dir }}/harbor/harbor.cfg"
@@ -45,7 +41,7 @@
   lineinfile:
     dest: "{{ local_release_dir }}/harbor/harbor.cfg"
     regexp: '^redis_url = redis:6379'
-    line: 'redis_url = {{internal_lb_vip_address}}:6379'
+    line: 'redis_url = {{ hostvars[groups["redis-cluster"][0]]["ansible_ssh_host"]  }}:6379'
 
 - name: Modify the install.sh
   copy:
@@ -56,4 +52,18 @@
 - name: Start the harbor for ha
   shell: |
       cd  "{{ local_release_dir }}/harbor";
-      ./install.sh --ha 
+      ./install.sh --ha
+
+- name: add iptable role
+  iptables:
+    table: nat
+    chain: PREROUTING
+    protocol: tcp
+    match: tcp
+    destination: "{{ internal_lb_vip_address }}"
+    destination_port: "{{ item }}"
+    jump: REDIRECT
+  with_items:
+    - 80
+    - 443
+

@@ -1,64 +1,65 @@
 ---
-#- name:  Install requirements  befor deploy the harbor instances
-#  hosts: harbor-cluster
-#  roles:
-#    - name: Run the commone role
-#      role: common
-#
-#    - name: Install the requirements packages
-#      role: pre-harbor
-#
-#    - name: Install pip
-#      role: pip_install
+- name:  Install requirements  befor deploy the harbor instances
+  hosts: harbor-cluster
+  roles:
+    - name: Run the commone role
+      role: common
 
-#- name:  Install db cluster
-#  hosts: galera_all
-#  roles: 
-#    - name: Install MariaDB cluster
-#      role: galera_server
-#
-#    - name: Install PostgresSQL cluster
-#      role: PostgresSQL
-#      when:
-#        - clair == true 
-#
-#- name:  Install redis cluster
-#  hosts: redis-cluster
-#  roles:
-#    - name: verify redis configure
-#      role: redis/verify
-#
-#    - name: install redis dependency package
-#      role: redis/pre
-#
-#    - name: install redis
-#      role: redis/install
-#
-#    - name: Configure and start the redis service
-#      role: redis/configure
+    - name: Install the requirements packages
+      role: pre-harbor
 
-#- name: Install share storage for images
-#  hosts: storage  
-#  roles:
-#    - name: Install NFS storage
-#      role: storage/install-nfs
-#      when:
-#        - storage_type == "NFS"
-#
-#- name: install harbor instance on the target nodes
-#  hosts: harbor-instances
-#  roles:
-#    - name: install docker-compose on the harbor instances node
-#      role: docker-compose
-#    
-#    - name: Config the harbor instances to ues nfs
-#      role: storage/config-nfs
-#      when:
-#        - storage_type == "NFS"
-#
-#    - name: install harbor instances
-#      role: harbor
-#
+    - name: Install pip
+      role: pip_install
+
+- name:  Install db cluster
+  hosts: galera_all
+  roles: 
+    - name: Install MariaDB cluster
+      role: galera_server
+
+- name: import harbor database to Mariadb cluster
+  hosts: galera_all[0]
+  roles:
+    - name: init db
+      role: init_db
+
+- name:  Install redis cluster
+  hosts: redis-cluster
+  roles:
+    - name: verify redis configure
+      role: redis/verify
+
+    - name: install redis dependency package
+      role: redis/pre
+
+    - name: install redis
+      role: redis/install
+
+    - name: Configure and start the redis service
+      role: redis/configure
+
+- name: Install share storage for images
+  hosts: storage  
+  roles:
+    - name: Install NFS storage
+      role: storage/install-nfs
+      when:
+        - storage_type == "NFS"
+
+- name: install harbor instance on the target nodes
+  hosts: harbor-instances
+  roles:
+    - name: install docker-compose on the harbor instances node
+      role: docker-compose
+    
+    - name: Config the harbor instances to ues nfs
+      role: storage/config-nfs
+      when:
+        - storage_type == "NFS"
+
+    - name: install harbor instances
+      role: harbor
+
 - name:  Install and loadbalance for Harbor cluster
   hosts: loadbalance
   roles: 

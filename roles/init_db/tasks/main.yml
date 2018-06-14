@@ -1,0 +1,15 @@
+- name: copy database data to server
+  copy:
+    src: db.sql
+    dest: /tmp/db.sql
+    owner: root
+    group: root
+
+- name: Importing database data
+  mysql_db:
+    login_user: "root"
+    login_password: "{{ galera_root_password }}"
+    login_port: "3306"
+    target: "/tmp/db.sql"
+    state: "import"
+    name: "all"
