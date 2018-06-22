@@ -99,3 +99,7 @@ redis_log_dir: /export/logs/redis
 
 ##### storage config #####################
 storage_type: "NFS"
+
+
+##### harbor config #####################
+harbor_admin_password: "Harbor12345"

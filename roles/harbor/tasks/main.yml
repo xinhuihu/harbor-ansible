@@ -43,6 +43,15 @@
     regexp: '^redis_url = redis:6379'
     line: 'redis_url = {{ hostvars[groups["redis-cluster"][0]]["ansible_ssh_host"]  }}:6379'
 
+- name: Modify the password of the Harbor admin
+  lineinfile:
+    dest: "{{ local_release_dir }}/harbor/harbor.cfg"
+    regexp: '^harbor_admin_password = Harbor12345'
+    line: 'harbor_admin_password = {{ harbor_admin_password }}'
+  when:
+    - harbor_admin_password is defined
+    - harbor_admin_password != ''
+
 - name: Modify the install.sh
   copy:
     src: install.sh
